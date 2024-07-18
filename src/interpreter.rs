@@ -16,7 +16,7 @@ pub fn read_in(path: &str) -> Vec<String> {
         .collect()
 }
 
-pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
+pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
     let mut beziers: Vec<Bezier> = vec!();
 
     let mut state: ParseState = ParseState::Read;
@@ -123,7 +123,13 @@ pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
 
         nums
     }
-    
+
+    // replace all '-' with " -"
+    for l in svg.iter_mut() {
+        *l = l.replace("-", " -");
+    }
+
+
     for l in svg {
         for c in l.chars() {
             match c.to_ascii_lowercase() {
