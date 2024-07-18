@@ -47,7 +47,7 @@ impl Bezier {
         }
     }
 
-    pub fn origin(&self) -> Point {
+    pub fn get_origin(&self) -> Point {
         match self {
             Bezier::Cubic(points) => points[4],
             Bezier::Quadratic(points) => points[3],
