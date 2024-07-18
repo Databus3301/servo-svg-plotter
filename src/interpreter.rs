@@ -16,34 +16,97 @@ pub fn read_in(path: &str) -> Vec<String> {
 }
 
 pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
-    let beziers: Vec<Bezier> = vec!();
+    let mut beziers: Vec<Bezier> = vec!();
 
     let mut state: ParseState = ParseState::Start;
     let mut cur_content = String::new();
-    let start;
-    let last_move = Point { x: 0.0, y: 0.0 };
+    let mut start: Option<Point> = None;
+    let mut last_move = Point { x: 0.0, y: 0.0 };
     let last_bezier: Bezier;
+
+    let resolve_move = |content: &str| {
+
+        let mut split = content.split_whitespace();
+        let x = f64::from_str(split.next().unwrap()).unwrap();
+        let y = f64::from_str(split.next().unwrap()).unwrap();
+        last_move = Point { x, y };
+
+        if start.is_none() {
+            start = Some(last_move);
+        }
+    };
+
+    let resolve_cubic = |content: &str| {
+        let mut split = content.split_whitespace();
+        let x0 = f64::from_str(split.next().unwrap()).unwrap();
+        let y0 = f64::from_str(split.next().unwrap()).unwrap();
+        let x1 = f64::from_str(split.next().unwrap()).unwrap();
+        let y1 = f64::from_str(split.next().unwrap()).unwrap();
+        let x2 = f64::from_str(split.next().unwrap()).unwrap();
+        let y2 = f64::from_str(split.next().unwrap()).unwrap();
+        let x3 = f64::from_str(split.next().unwrap()).unwrap();
+        let y3 = f64::from_str(split.next().unwrap()).unwrap();
+        let origin = last_move;
+        last_bezier = Bezier::new_c(origin, Point { x: x0, y: y0 }, Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, Point { x: x3, y: y3 });
+        beziers.push(last_bezier);
+    };
+
+    let resolve_quadratic = |content: &str| {
+        let mut split = content.split_whitespace();
+        let x0 = f64::from_str(split.next().unwrap()).unwrap();
+        let y0 = f64::from_str(split.next().unwrap()).unwrap();
+        let x1 = f64::from_str(split.next().unwrap()).unwrap();
+        let y1 = f64::from_str(split.next().unwrap()).unwrap();
+        let x2 = f64::from_str(split.next().unwrap()).unwrap();
+        let y2 = f64::from_str(split.next().unwrap()).unwrap();
+        let origin = last_move;
+        last_bezier = Bezier::new_q(origin, Point { x: x0, y: y0 }, Point { x: x1, y: y1 }, Point { x: x2, y: y2 });
+        beziers.push(last_bezier);
+    };
+
+    let resolve_line = |content: &str| {
+        let mut split = content.split_whitespace();
+        let x0 = f64::from_str(split.next().unwrap()).unwrap();
+        let y0 = f64::from_str(split.next().unwrap()).unwrap();
+        let x1 = f64::from_str(split.next().unwrap()).unwrap();
+        let y1 = f64::from_str(split.next().unwrap()).unwrap();
+        let origin = last_move;
+        last_bezier = Bezier::new_l(origin, Point { x: x0, y: y0 }, Point { x: x1, y: y1 });
+        beziers.push(last_bezier);
+    };
+
+
 
     for l in svg {
         for c in l.chars() {
             match c.to_ascii_lowercase() {
                 'm' => {
-
+                    resolve_move(&cur_content);
                     state = ParseState::Move
                 },
-                'c' => state = ParseState::Cubic,
-                'q' => state = ParseState::Quadratic,
-                'l' => state = ParseState::Line,
+                'c' => {
+                    resolve_cubic(&cur_content);
+                    state = ParseState::Cubic
+                },
+                'q' => {
+                    resolve_quadratic(&cur_content);
+                    state = ParseState::Quadratic
+                },
+                'l' => {
+                    resolve_line(&cur_content);
+                    state = ParseState::Line
+                },
                 _ => cur_content.push(c)
             }
         }
     }
+
+
+
     beziers
 }
 
-fn resolve_content(state: ParseState, content: String, last_move: Point) {
 
-}
 
 
 #[derive(Debug, PartialEq)]
