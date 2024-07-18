@@ -33,26 +33,28 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 for i in (0..nums.len()).step_by(2) {
                     let x = nums[i];
                     let y = nums[i+1];
-                    last_pos = Point { x, y };
-
-                    if start.is_none() {
-                        start = Some(last_pos);
-                        println!("Start: {:?}", start);
-                    }
 
                     if i != 0 {
                         last_bezier = Bezier::new_l(last_pos, Point { x, y });
                         beziers.push(last_bezier.clone());
                         println!("Line: {:?}", last_bezier);
                     } else {
-                        println!("Move: {:?}", last_pos);
+                        println!("Move: {:?}", Point { x, y } );
+                    }
+
+                    last_pos = Point { x, y };
+
+                    if start.is_none() {
+                        start = Some(last_pos);
+                        println!("Start: {:?}", start);
                     }
                 }
+                cur_content.clear();
             },
             ParseState::Cubic => {
                 let nums = tokenize(&cur_content);
                 let origin = last_pos;
-                last_bezier = Bezier::new_c(origin, Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] }, Point { x: nums[4], y: nums[5] }, Point { x: nums[6], y: nums[7] });
+                last_bezier = Bezier::new_c(origin, Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] }, Point { x: nums[4], y: nums[5] });
                 last_pos = last_bezier.point_at(1f64).unwrap();
                 beziers.push(last_bezier);
                 cur_content.clear();
@@ -61,7 +63,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
             ParseState::Quadratic => {
                 let nums = tokenize(&cur_content);
                 let origin = last_pos;
-                last_bezier = Bezier::new_q(origin, Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] }, Point { x: nums[4], y: nums[5] });
+                last_bezier = Bezier::new_q(origin, Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] });
                 last_pos = last_bezier.point_at(1f64).unwrap();
                 beziers.push(last_bezier);
                 cur_content.clear();
@@ -142,7 +144,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
     for l in svg {
         for c in l.chars() {
-            match c {
+            match c.to_ascii_lowercase() {
                 'm' => {
                     resolve_path(&state, &c);
                     state = ParseState::Move;
@@ -303,6 +305,5 @@ fn convert_arc_segment_to_bezier(cx: f64, cy: f64, rx: f64, ry: f64, x_axis_rota
         Point { x: start_x + e1x, y: start_y + e1y },
         Point { x: end_x + e2x, y: end_y + e2y },
         Point { x: end_x, y: end_y },
-        Point { x: cx, y: cy }, // Origin point for consistency with the Bezier struct
     ])
 }

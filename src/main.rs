@@ -5,8 +5,6 @@ use bezier::Point;
 use bezier::Bezier;
 
 fn main() {
-    let bs = interpreter::parse_svg(interpreter::read_in("./res/output3.svg"));
-    for b in bs {
-        println!("{:?}", b);
-    }
+    let bs = interpreter::parse_svg(interpreter::read_in("./res/output.svg"));
+
 }
