@@ -1,0 +1,135 @@
+10132  cp servo-svg-plotter/res/output.svg .
+10133  ls
+10134  mkdir svgo_test
+10135  mv output.svg svgo_test
+10136  cd svgo_test
+10137  ls
+10138  npm install -g svgo
+10139  sudo npm install -g svgo
+10140  ls
+10141  mkdir test
+10142  cd test
+10143  su
+10144  npm install -g svgo
+10145  ls
+10146  ls -lah
+10147  sudo npm install -g svgo
+10148  ls
+10149  npm install -g svgo
+10150  npm
+10151  npm init
+10152  ls
+10153  npm install -g svgo
+10154  npm install svgo
+10155  ls
+10156  touch svgo.config.js
+10157  nano svgo.config.js
+10158  nano convert-svg.js
+10159  nano package.json
+10160  mv ../output.svg .
+10161  ls
+10162  npm run convert-svg -- output.svg output2.svg
+10163  nano convert-svg.js
+10164  npm run convert-svg -- output.svg output2.svg
+10165  nano convert-svg.js
+10166  npm run convert-svg -- output.svg output2.svg
+10167  ls
+10168  cat output2.svg
+10169  nano svgo.config.js
+10170  nano convert-svg.js
+10171  ls
+10172  nano convert-svg.js
+10173  npm run convert-svg -- output.svg output3.svg
+10174  nano output3.svg
+10175  nano convert-svg.js
+10176  rm svgo.config.js
+10177  nano svgo.config.js
+10178  rm convert-svg.js
+10179  nano convert-svg.js
+10180  node convert-svg.js output.svg output4.svg
+10181  nano convert-svg.js
+10182  node convert-svg.js output.svg output4.svg
+10183  nano output4.svg
+10184  cat output4.svg
+10185  rm svgo.config.js
+10186  nano svgo.config.js
+10187  node convert-svg.js output.svg output4.svg
+10188  rm output2.svg output3.svg output4.svg
+10189  node convert-svg.js output.svg output1.svg
+10190  cat output1.svg
+10191  nano output1.svg
+10192  npm install sgvo
+10193  npm install sgvo --safe
+10194  npm install svgo --safe
+10195  ls
+10196  diff output1.svg output.svg
+10197  cd Drive/Documents/scripts/arduino
+10198  cd svgo_test
+10199  ls
+10200  cd test
+10201  cp output.svg ../
+10202  cd ..
+10203  mkdir test2
+10204  mv output.svg test2
+10205  cd test2
+10206  ls
+10207  npm init
+10208  npm install svg-path-converter
+10209  nano main.js
+10210  node main.js output.svg o2.svg
+10211  nano main.js
+10212  nano main2.js
+10213  npm install svg-path-simplify
+10214  ls
+10215  node main.js output.svg o2.svg
+10216  cd ,,
+10217  cd ..
+10218  ls
+10219  cd test
+10220  ls
+10221  node convert-svg.js output.svg output2.svg
+10222  nano output2.svg
+10223  pip install svgpathtools
+10224  sudo pacman -S svgpathtools
+10225  cd Drive/Programs
+10226  git clone https://aur.archlinux.org/python-svgpathtools.git
+10227  cd python-svgpathtools
+10228  makepkg -si
+10229  python src/converter.py
+10230  sudo pacman -S svg.path lxml
+10231  cd Drive/Programs
+10232  git clone https://aur.archlinux.org/python-svg.path.git
+10233  cd python-svg
+10234  cd python-svg.path
+10235  makepkg -si
+10236  cd ..
+10237  sudo pacman -S python-lxml
+10238  python ./src/converter.py ./res/output.svg ./res/output3.svg
+10239  cd res
+10240  chmod a+x ../src/convert_svg.sh
+10241  ../src/convert_svg.sh output.svg
+10242  sudo pacman -S inkscape
+10243  sudo pacman -Sy inkscape
+10244  ../src/convert_svg.sh output.svg
+10245  inkscape output.svg
+10246  inkscape
+10247  inkscape output.svg
+10248  inkscape output3.svg
+10249  sudo pacman -S svgcleaner
+10250  cd /mnt/media/Documents/scripts/arduino/servo-svg-plotter/res
+10251  svgcleaner output.svg o.svg
+10252  svgcleaner --help
+10253  cd /mnt/media/Documents/scripts/arduino/servo-svg-plotter/res
+10254  svgcleaner --remove-unused-segments=no --paths-to-relative=no --join-arcto-flags=no --convert-segments=yes --apply-transform-to-paths=yes --remove-invalid-stops=yes --coordinates-precision=6 output.svg o2.svg
+10255  svgcleaner --remove-unused-segments=no --paths-to-relative=no --join-arcto-flags=no --apply-transform-to-paths=yes --remove-invalid-stops=yes --coordinates-precision=6 output.svg o2.svg
+10256  svgcleaner --remove-unused-segments=no --paths-to-relative=no --conver-segments=no --join-arcto-flags=no --apply-transform-to-paths=yes --remove-invalid-stops=yes --coordinates-precision=6 output.svg o2.svg
+10257  svgcleaner --remove-unused-segments=no --paths-to-relative=no --convert-segments=no --join-arcto-flags=no --apply-transform-to-paths=yes --remove-invalid-stops=yes --coordinates-precision=6 output.svg o2.svg
+10258  svgcleaner --remove-unused-segments=no --paths-to-relative=no --convert-segments=no --join-arcto-flags=no --apply-transform-to-paths=no --remove-invalid-stops=yes --coordinates-precision=6 output.svg o2.svg
+10259  cd /mnt/media/Documents/scripts/arduino/servo-svg-plotter/res
+10260  sudo pacman -S poppler pdf2svg
+10261  svg2pdf output.svg o.pdf
+10262  cd /mnt/media/Documents/scripts/arduino/servo-svg-plotter/res
+10263  sudo pacman -S poppler
+10264  convert output.svg o.pdf
+10265  convert o.pdf i.svg
+10266  pdf2svg o.pdf a.svg

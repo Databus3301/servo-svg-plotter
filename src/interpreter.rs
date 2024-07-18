@@ -118,9 +118,8 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 cur_content.clear();
                 println!("Close: {:?}", last_bezier);
             },
-            ParseState::Read => {
-                cur_content.push(*c);
-            }
+
+            _ => { cur_content.push(*c); }
         }
     };
 
@@ -143,7 +142,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
     for l in svg {
         for c in l.chars() {
-            match c.to_ascii_lowercase() {
+            match c {
                 'm' => {
                     resolve_path(&state, &c);
                     state = ParseState::Move;
@@ -189,14 +188,22 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 #[derive(Debug, PartialEq)]
 enum ParseState {
     Read,
+    MOVE,
     Move,
     Cubic,
+    CUBIC,
     Quadratic,
+    QUADRATIC,
     Line,
+    LINE,
     Horizontal,
+    HORIZONTAL,
     Vertical,
+    VERTICAL,
     Arc,
-    Close
+    ARC,
+    Close,
+    CLOSE
 }
 
 // THE FOLLOWING IS GENERATE BY AI (GPT4o)
