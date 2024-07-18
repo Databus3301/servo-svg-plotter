@@ -63,8 +63,8 @@ pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
             },
             ParseState::Line => {
                 let nums = tokenize(&cur_content);
-                last_bezier = Bezier::new_l(Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] });
-                last_pos = Point { x: nums[2], y: nums[3] };
+                last_bezier = Bezier::new_l(last_pos, Point { x: nums[0], y: nums[1] });
+                last_pos = Point { x: nums[0], y: nums[1] };
                 beziers.push(last_bezier);
                 cur_content.clear();
             },
@@ -115,7 +115,8 @@ pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
     fn tokenize(content: &str) -> Vec<f64> {
        let nums = content.split(|c: char| !c.is_ascii_digit() && c != '.' && c != '-')
             .filter(|s| !s.is_empty())
-            .map(|s| f64::from_str(s.trim()).unwrap_or(0.0))
+            .map(|s| f64::from_str(s.trim()).unwrap_or(-42.4242))
+            .filter(|n| *n != -42.4242)
             .collect::<Vec<f64>>();
 
         println!("{:?}", nums);
@@ -124,7 +125,6 @@ pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
     }
     
     for l in svg {
-        let _ = l.replace("-", " -");
         for c in l.chars() {
             match c.to_ascii_lowercase() {
                 'm' => {
