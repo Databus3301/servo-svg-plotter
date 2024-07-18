@@ -4,7 +4,7 @@ pub(crate) struct Point {
     pub y: f64,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub(crate) enum Bezier {
     Cubic([Point; 5]),
     Quadratic([Point; 4]),

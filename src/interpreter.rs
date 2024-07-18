@@ -23,69 +23,68 @@ pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
     let mut cur_content = String::new();
     let mut start: Option<Point> = None;
     let mut last_pos = Point { x: 0.0, y: 0.0 };
-    let last_bezier: Bezier;
+    let mut last_bezier: Bezier = Bezier::new_l(Point { x: 0.0, y: 0.0 }, Point { x: 0.0, y: 0.0 });
 
-    let resolve_move = |content: &str| {
+    let mut resolve_path = || {
+        let mut split = cur_content.split_whitespace().peekable();
+        match state {
+            ParseState::Move => {
+                let x = parse_f64(&mut split);
+                let y = parse_f64(&mut split);
+                last_pos = Point { x, y };
 
-        let mut split = content.split_whitespace().peekable();
-        let x = parse_f64(&split);
-        let y = parse_f64(&split);
-        last_pos = Point { x, y };
+                if start.is_none() {
+                    start = Some(last_pos);
+                }
 
-        if start.is_none() {
-            start = Some(last_pos);
+                while split.peek().is_some() {
+                    let x = parse_f64(&mut split);
+                    let y = parse_f64(&mut split);
+                    last_bezier = Bezier::new_l(last_pos, Point { x, y });
+                    last_pos = Point { x, y };
+                    beziers.push(last_bezier.clone());
+                }
+            },
+            ParseState::Cubic => {
+                let x0 = parse_f64(&mut split);
+                let y0 = parse_f64(&mut split);
+                let x1 = parse_f64(&mut split);
+                let y1 = parse_f64(&mut split);
+                let x2 = parse_f64(&mut split);
+                let y2 = parse_f64(&mut split);
+                let x3 = parse_f64(&mut split);
+                let y3 = parse_f64(&mut split);
+                let origin = last_pos;
+                last_bezier = Bezier::new_c(origin, Point { x: x0, y: y0 }, Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, Point { x: x3, y: y3 });
+                last_pos = last_bezier.point_at(1f64).unwrap();
+                beziers.push(last_bezier);
+            },
+            ParseState::Quadratic => {
+                let x0 = parse_f64(&mut split);
+                let y0 = parse_f64(&mut split);
+                let x1 = parse_f64(&mut split);
+                let y1 = parse_f64(&mut split);
+                let x2 = parse_f64(&mut split);
+                let y2 = parse_f64(&mut split);
+                let origin = last_pos;
+                last_bezier = Bezier::new_q(origin, Point { x: x0, y: y0 }, Point { x: x1, y: y1 }, Point { x: x2, y: y2 });
+                last_pos = last_bezier.point_at(1f64).unwrap();
+                beziers.push(last_bezier);
+            },
+            ParseState::Line => {
+                let x0 = parse_f64(&mut split);
+                let y0 = parse_f64(&mut split);
+                let x1 = parse_f64(&mut split);
+                let y1 = parse_f64(&mut split);
+                last_bezier = Bezier::new_l(Point { x: x0, y: y0 }, Point { x: x1, y: y1 });
+                last_pos = Point { x: x1, y: y1 };
+                beziers.push(last_bezier);
+            },
+            _ => {}
         }
-
-        // handle implicit line syntax i.e -> m 1 1 2 2 3 3 z
-        while split.peek().is_some() {
-            let x = parse_f64(&split);
-            let y = parse_f64(&split);
-            last_pos = Point { x, y };
-            last_bezier = Bezier::new_l(last_pos, last_pos);
-            beziers.push(last_bezier);
-        }
     };
 
-    let resolve_cubic = |content: &str| {
-        let mut split = content.split_whitespace().peekable();
-        let x0 = parse_f64(&split);
-        let y0 = parse_f64(&split);
-        let x1 = parse_f64(&split);
-        let y1 = parse_f64(&split);
-        let x2 = parse_f64(&split);
-        let y2 = parse_f64(&split);
-        let x3 = parse_f64(&split);
-        let y3 = parse_f64(&split);
-        let origin = last_pos;
-        last_bezier = Bezier::new_c(origin, Point { x: x0, y: y0 }, Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, Point { x: x3, y: y3 });
-        beziers.push(last_bezier);
-    };
-
-    let resolve_quadratic = |content: &str| {
-        let mut split = content.split_whitespace().peekable();
-        let x0 = parse_f64(&split);
-        let y0 = parse_f64(&split);
-        let x1 = parse_f64(&split);
-        let y1 = parse_f64(&split);
-        let x2 = parse_f64(&split);
-        let y2 = parse_f64(&split);
-        let origin = last_pos;
-        last_bezier = Bezier::new_q(origin, Point { x: x0, y: y0 }, Point { x: x1, y: y1 }, Point { x: x2, y: y2 });
-        beziers.push(last_bezier);
-    };
-
-    let resolve_line = |content: &str| {
-        let mut split = content.split_whitespace().peekable();
-        let x0 = parse_f64(&split);
-        let y0 = parse_f64(&split);
-        let x1 = parse_f64(&split);
-        let y1 = parse_f64(&split);
-        let origin = last_pos;
-        last_bezier = Bezier::new_l(origin, Point { x: x0, y: y0 }, Point { x: x1, y: y1 });
-        beziers.push(last_bezier);
-    };
-
-    fn parse_f64(mut split: &Peekable<SplitWhitespace>) -> f64 {
+    fn parse_f64(mut split: &mut Peekable<SplitWhitespace>) -> f64 {
         f64::from_str(split.next().unwrap().trim()).unwrap()
     }
 
@@ -95,19 +94,19 @@ pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
         for c in l.chars() {
             match c.to_ascii_lowercase() {
                 'm' => {
-                    resolve_move(&cur_content);
+                    resolve_path();
                     state = ParseState::Move
                 },
                 'c' => {
-                    resolve_cubic(&cur_content);
+                    resolve_path();
                     state = ParseState::Cubic
                 },
                 'q' => {
-                    resolve_quadratic(&cur_content);
+                    resolve_path();
                     state = ParseState::Quadratic
                 },
                 'l' => {
-                    resolve_line(&cur_content);
+                    resolve_path();
                     state = ParseState::Line
                 },
                 _ => cur_content.push(c)
