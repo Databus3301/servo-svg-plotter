@@ -1,7 +1,6 @@
 use std::io::{BufRead, BufReader};
 use std::iter::Peekable;
 use std::str::{FromStr, SplitWhitespace};
-use crate::bezier;
 use crate::bezier::Point;
 use crate::bezier::Bezier;
 
@@ -26,74 +25,75 @@ pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
     let mut last_bezier: Bezier = Bezier::new_l(Point { x: 0.0, y: 0.0 }, Point { x: 0.0, y: 0.0 });
 
     let mut resolve_path = |state: &ParseState, c: &char| {
-        let mut split = cur_content.split_whitespace().peekable();
         match state {
             ParseState::Move => {
-                let x = parse_f64(&mut split);
-                let y = parse_f64(&mut split);
-                last_pos = Point { x, y };
+                let nums = tokenize(&cur_content);
+                println!("{:?}", nums);
 
-                if start.is_none() {
-                    start = Some(last_pos);
-                }
-
-                while split.peek().is_some() {
-                    let x = parse_f64(&mut split);
-                    let y = parse_f64(&mut split);
-                    last_bezier = Bezier::new_l(last_pos, Point { x, y });
+                for i in (0..nums.len()).step_by(2) {
+                    let x = nums[i];
+                    let y = nums[i+1];
                     last_pos = Point { x, y };
-                    beziers.push(last_bezier.clone());
+
+                    if start.is_none() {
+                        start = Some(last_pos);
+                    }
+
+                    if i != 0 {
+                        last_bezier = Bezier::new_l(last_pos, Point { x, y });
+                        beziers.push(last_bezier.clone());
+                    }
                 }
             },
             ParseState::Cubic => {
-                let x0 = parse_f64(&mut split);
-                let y0 = parse_f64(&mut split);
-                let x1 = parse_f64(&mut split);
-                let y1 = parse_f64(&mut split);
-                let x2 = parse_f64(&mut split);
-                let y2 = parse_f64(&mut split);
-                let x3 = parse_f64(&mut split);
-                let y3 = parse_f64(&mut split);
+                let nums = tokenize(&cur_content);
                 let origin = last_pos;
-                last_bezier = Bezier::new_c(origin, Point { x: x0, y: y0 }, Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, Point { x: x3, y: y3 });
+                last_bezier = Bezier::new_c(origin, Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] }, Point { x: nums[4], y: nums[5] }, Point { x: nums[6], y: nums[7] });
                 last_pos = last_bezier.point_at(1f64).unwrap();
                 beziers.push(last_bezier);
+                cur_content.clear();
             },
             ParseState::Quadratic => {
-                let x0 = parse_f64(&mut split);
-                let y0 = parse_f64(&mut split);
-                let x1 = parse_f64(&mut split);
-                let y1 = parse_f64(&mut split);
-                let x2 = parse_f64(&mut split);
-                let y2 = parse_f64(&mut split);
+                let nums = tokenize(&cur_content);
                 let origin = last_pos;
-                last_bezier = Bezier::new_q(origin, Point { x: x0, y: y0 }, Point { x: x1, y: y1 }, Point { x: x2, y: y2 });
+                last_bezier = Bezier::new_q(origin, Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] }, Point { x: nums[4], y: nums[5] });
                 last_pos = last_bezier.point_at(1f64).unwrap();
                 beziers.push(last_bezier);
+                cur_content.clear();
             },
             ParseState::Line => {
-                let x0 = parse_f64(&mut split);
-                let y0 = parse_f64(&mut split);
-                let x1 = parse_f64(&mut split);
-                let y1 = parse_f64(&mut split);
-                last_bezier = Bezier::new_l(Point { x: x0, y: y0 }, Point { x: x1, y: y1 });
-                last_pos = Point { x: x1, y: y1 };
+                let nums = tokenize(&cur_content);
+                last_bezier = Bezier::new_l(Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] });
+                last_pos = Point { x: nums[2], y: nums[3] };
                 beziers.push(last_bezier);
+                cur_content.clear();
+            },
+            ParseState::Horizontal => {
+                let nums = tokenize(&cur_content);
+                last_bezier = Bezier::new_l(last_pos, Point { x: nums[0], y: last_pos.y });
+                last_pos = Point { x: nums[0], y: last_pos.y };
+                beziers.push(last_bezier);
+                cur_content.clear();
+            },
+            ParseState::Vertical => {
+                let nums = tokenize(&cur_content);
+                last_bezier = Bezier::new_l(last_pos, Point { x: last_pos.x, y: nums[0] });
+                last_pos = Point { x: last_pos.x, y: nums[0] };
+                beziers.push(last_bezier);
+                cur_content.clear();
             },
             ParseState::Read => {
-                if c.is_whitespace() {
-                    return;
-                }
                 cur_content.push(*c);
             }
         }
     };
 
-    fn parse_f64(mut split: &mut Peekable<SplitWhitespace>) -> f64 {
-        f64::from_str(split.next().unwrap().trim()).unwrap()
+    fn tokenize(content: &str) -> Vec<f64> {
+        content.split(|c: char| !c.is_numeric() || c == '.')
+            .filter(|s| !s.is_empty())
+            .map(|s| f64::from_str(s.trim()).unwrap_or(0.0))
+            .collect::<Vec<f64>>()
     }
-
-
 
     for l in svg {
         for c in l.chars() {
@@ -114,13 +114,18 @@ pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
                     resolve_path(&state, &c);
                     state = ParseState::Line;
                 },
+                'h' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::Horizontal;
+                },
+                'v' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::Vertical;
+                },
                 _ => resolve_path(&ParseState::Read, &c),
             }
         }
     }
-
-
-
     beziers
 }
 
@@ -134,4 +139,6 @@ enum ParseState {
     Cubic,
     Quadratic,
     Line,
+    Horizontal,
+    Vertical,
 }
