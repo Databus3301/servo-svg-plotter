@@ -17,4 +17,6 @@ fn main() {
     println!("{:?}", cubic_points);
     println!("{:?}", quadratic_points);
     println!("{:?}", line_points);
+
+    interpreter::parse_svg(interpreter::read_in("./res/output.svg"));
 }

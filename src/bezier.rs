@@ -6,22 +6,22 @@ pub(crate) struct Point {
 
 #[derive(Debug, PartialEq)]
 pub(crate) enum Bezier {
-    Cubic([Point; 4]),
-    Quadratic([Point; 3]),
-    Line([Point; 2]),
+    Cubic([Point; 5]),
+    Quadratic([Point; 4]),
+    Line([Point; 3]),
 }
 
 impl Bezier {
-    pub fn new_c(p0: Point, p1: Point, p2: Point, p3: Point) -> Self {
-        Bezier::Cubic([p0, p1, p2, p3])
+    pub fn new_c(origin: Point, p0: Point, p1: Point, p2: Point, p3: Point) -> Self {
+        Bezier::Cubic([p0, p1, p2, p3, origin])
     }
 
-    pub fn new_q(p0: Point, p1: Point, p2: Point) -> Self {
-        Bezier::Quadratic([p0, p1, p2])
+    pub fn new_q(origin: Point, p0: Point, p1: Point, p2: Point) -> Self {
+        Bezier::Quadratic([p0, p1, p2, origin])
     }
 
-    pub fn new_l(p0: Point, p1: Point) -> Self {
-        Bezier::Line([p0, p1])
+    pub fn new_l(origin: Point, p0: Point, p1: Point) -> Self {
+        Bezier::Line([p0, p1, origin])
     }
 
     pub fn point_at(&self, t: f64) -> Result<Point, &'static str> {
@@ -44,6 +44,14 @@ impl Bezier {
                 let y = (1.0 - t) * points[0].y + t * points[1].y;
                 Ok(Point { x, y })
             },
+        }
+    }
+
+    pub fn origin(&self) -> Point {
+        match self {
+            Bezier::Cubic(points) => points[4],
+            Bezier::Quadratic(points) => points[3],
+            Bezier::Line(points) => points[2],
         }
     }
 }
