@@ -19,13 +19,13 @@ pub fn read_in(path: &str) -> Vec<String> {
 pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
     let mut beziers: Vec<Bezier> = vec!();
 
-    let mut state: ParseState = ParseState::Start;
+    let mut state: ParseState = ParseState::Read;
     let mut cur_content = String::new();
     let mut start: Option<Point> = None;
     let mut last_pos = Point { x: 0.0, y: 0.0 };
     let mut last_bezier: Bezier = Bezier::new_l(Point { x: 0.0, y: 0.0 }, Point { x: 0.0, y: 0.0 });
 
-    let mut resolve_path = || {
+    let mut resolve_path = |state: &ParseState, c: &char| {
         let mut split = cur_content.split_whitespace().peekable();
         match state {
             ParseState::Move => {
@@ -80,7 +80,12 @@ pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
                 last_pos = Point { x: x1, y: y1 };
                 beziers.push(last_bezier);
             },
-            _ => {}
+            ParseState::Read => {
+                if c.is_whitespace() {
+                    return;
+                }
+                cur_content.push(*c);
+            }
         }
     };
 
@@ -94,22 +99,22 @@ pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
         for c in l.chars() {
             match c.to_ascii_lowercase() {
                 'm' => {
-                    resolve_path();
-                    state = ParseState::Move
+                    resolve_path(&state, &c);
+                    state = ParseState::Move;
                 },
                 'c' => {
-                    resolve_path();
-                    state = ParseState::Cubic
+                    resolve_path(&state, &c);
+                    state = ParseState::Cubic;
                 },
                 'q' => {
-                    resolve_path();
-                    state = ParseState::Quadratic
+                    resolve_path(&state, &c);
+                    state = ParseState::Quadratic;
                 },
                 'l' => {
-                    resolve_path();
-                    state = ParseState::Line
+                    resolve_path(&state, &c);
+                    state = ParseState::Line;
                 },
-                _ => cur_content.push(c)
+                _ => resolve_path(&ParseState::Read, &c),
             }
         }
     }
@@ -124,7 +129,7 @@ pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
 
 #[derive(Debug, PartialEq)]
 enum ParseState {
-    Start,
+    Read,
     Move,
     Cubic,
     Quadratic,
