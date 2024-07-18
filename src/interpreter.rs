@@ -37,11 +37,15 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
                     if start.is_none() {
                         start = Some(last_pos);
+                        println!("Start: {:?}", start);
                     }
 
                     if i != 0 {
                         last_bezier = Bezier::new_l(last_pos, Point { x, y });
                         beziers.push(last_bezier.clone());
+                        println!("Line: {:?}", last_bezier);
+                    } else {
+                        println!("Move: {:?}", last_pos);
                     }
                 }
             },
@@ -52,6 +56,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 last_pos = last_bezier.point_at(1f64).unwrap();
                 beziers.push(last_bezier);
                 cur_content.clear();
+                println!("Cubic: {:?}", last_bezier);
             },
             ParseState::Quadratic => {
                 let nums = tokenize(&cur_content);
@@ -60,6 +65,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 last_pos = last_bezier.point_at(1f64).unwrap();
                 beziers.push(last_bezier);
                 cur_content.clear();
+                println!("Quadratic: {:?}", last_bezier);
             },
             ParseState::Line => {
                 let nums = tokenize(&cur_content);
@@ -67,6 +73,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 last_pos = Point { x: nums[0], y: nums[1] };
                 beziers.push(last_bezier);
                 cur_content.clear();
+                println!("Line: {:?}", last_bezier);
             },
             ParseState::Horizontal => {
                 let nums = tokenize(&cur_content);
@@ -74,6 +81,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 last_pos = Point { x: nums[0], y: last_pos.y };
                 beziers.push(last_bezier);
                 cur_content.clear();
+                println!("Horizontal: {:?}", last_bezier);
             },
             ParseState::Vertical => {
                 let nums = tokenize(&cur_content);
@@ -81,6 +89,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 last_pos = Point { x: last_pos.x, y: nums[0] };
                 beziers.push(last_bezier);
                 cur_content.clear();
+                println!("Vertical: {:?}", last_bezier);
             },
             ParseState::Arc => {
                 let nums = tokenize(&cur_content);
@@ -94,9 +103,11 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 let arcs = arc_to_beziers(origin, rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, end);
                 for a in arcs {
                     beziers.push(a);
+                    println!("Arc: {:?}", a);
                 }
                 last_pos = end;
                 cur_content.clear();
+
             },
             ParseState::Close => {
                 if let Some(s) = start {
@@ -105,6 +116,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                     beziers.push(last_bezier);
                 }
                 cur_content.clear();
+                println!("Close: {:?}", last_bezier);
             },
             ParseState::Read => {
                 cur_content.push(*c);
@@ -119,14 +131,13 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
             .filter(|n| *n != -42.4242)
             .collect::<Vec<f64>>();
 
-        println!("{:?}", nums);
-
         nums
     }
 
     // replace all '-' with " -"
     for l in svg.iter_mut() {
         *l = l.replace("-", " -");
+        *l = l.replace("h", " h");
     }
 
 
