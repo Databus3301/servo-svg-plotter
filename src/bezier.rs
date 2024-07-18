@@ -8,7 +8,7 @@ pub(crate) struct Point {
 pub(crate) enum Bezier {
     Cubic([Point; 5]),
     Quadratic([Point; 4]),
-    Line([Point; 3]),
+    Line([Point; 2]),
 }
 
 impl Bezier {
@@ -20,8 +20,8 @@ impl Bezier {
         Bezier::Quadratic([p0, p1, p2, origin])
     }
 
-    pub fn new_l(origin: Point, p0: Point, p1: Point) -> Self {
-        Bezier::Line([p0, p1, origin])
+    pub fn new_l(p0: Point, p1: Point) -> Self {
+        Bezier::Line([p0, p1])
     }
 
     pub fn point_at(&self, t: f64) -> Result<Point, &'static str> {
@@ -51,7 +51,7 @@ impl Bezier {
         match self {
             Bezier::Cubic(points) => points[4],
             Bezier::Quadratic(points) => points[3],
-            Bezier::Line(points) => points[2],
+            Bezier::Line(points) => points[0],
         }
     }
 

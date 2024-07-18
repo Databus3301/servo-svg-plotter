@@ -1,5 +1,6 @@
 use std::io::{BufRead, BufReader};
-use std::str::FromStr;
+use std::iter::Peekable;
+use std::str::{FromStr, SplitWhitespace};
 use crate::bezier;
 use crate::bezier::Point;
 use crate::bezier::Bezier;
@@ -27,8 +28,8 @@ pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
     let resolve_move = |content: &str| {
 
         let mut split = content.split_whitespace().peekable();
-        let x = f64::from_str(split.next().unwrap()).unwrap();
-        let y = f64::from_str(split.next().unwrap()).unwrap();
+        let x = parse_f64(&split);
+        let y = parse_f64(&split);
         last_pos = Point { x, y };
 
         if start.is_none() {
@@ -36,53 +37,57 @@ pub fn parse_svg(svg: Vec<String>) -> Vec<Bezier> {
         }
 
         // handle implicit line syntax i.e -> m 1 1 2 2 3 3 z
-        if split.peek().is_some() {
-            let x = f64::from_str(split.next().unwrap()).unwrap();
-            let y = f64::from_str(split.next().unwrap()).unwrap();
+        while split.peek().is_some() {
+            let x = parse_f64(&split);
+            let y = parse_f64(&split);
             last_pos = Point { x, y };
-            last_bezier = Bezier::new_l(start.unwrap(), last_pos, last_pos);
+            last_bezier = Bezier::new_l(last_pos, last_pos);
             beziers.push(last_bezier);
         }
     };
 
     let resolve_cubic = |content: &str| {
-        let mut split = content.split_whitespace();
-        let x0 = f64::from_str(split.next().unwrap()).unwrap();
-        let y0 = f64::from_str(split.next().unwrap()).unwrap();
-        let x1 = f64::from_str(split.next().unwrap()).unwrap();
-        let y1 = f64::from_str(split.next().unwrap()).unwrap();
-        let x2 = f64::from_str(split.next().unwrap()).unwrap();
-        let y2 = f64::from_str(split.next().unwrap()).unwrap();
-        let x3 = f64::from_str(split.next().unwrap()).unwrap();
-        let y3 = f64::from_str(split.next().unwrap()).unwrap();
+        let mut split = content.split_whitespace().peekable();
+        let x0 = parse_f64(&split);
+        let y0 = parse_f64(&split);
+        let x1 = parse_f64(&split);
+        let y1 = parse_f64(&split);
+        let x2 = parse_f64(&split);
+        let y2 = parse_f64(&split);
+        let x3 = parse_f64(&split);
+        let y3 = parse_f64(&split);
         let origin = last_pos;
         last_bezier = Bezier::new_c(origin, Point { x: x0, y: y0 }, Point { x: x1, y: y1 }, Point { x: x2, y: y2 }, Point { x: x3, y: y3 });
         beziers.push(last_bezier);
     };
 
     let resolve_quadratic = |content: &str| {
-        let mut split = content.split_whitespace();
-        let x0 = f64::from_str(split.next().unwrap()).unwrap();
-        let y0 = f64::from_str(split.next().unwrap()).unwrap();
-        let x1 = f64::from_str(split.next().unwrap()).unwrap();
-        let y1 = f64::from_str(split.next().unwrap()).unwrap();
-        let x2 = f64::from_str(split.next().unwrap()).unwrap();
-        let y2 = f64::from_str(split.next().unwrap()).unwrap();
+        let mut split = content.split_whitespace().peekable();
+        let x0 = parse_f64(&split);
+        let y0 = parse_f64(&split);
+        let x1 = parse_f64(&split);
+        let y1 = parse_f64(&split);
+        let x2 = parse_f64(&split);
+        let y2 = parse_f64(&split);
         let origin = last_pos;
         last_bezier = Bezier::new_q(origin, Point { x: x0, y: y0 }, Point { x: x1, y: y1 }, Point { x: x2, y: y2 });
         beziers.push(last_bezier);
     };
 
     let resolve_line = |content: &str| {
-        let mut split = content.split_whitespace();
-        let x0 = f64::from_str(split.next().unwrap()).unwrap();
-        let y0 = f64::from_str(split.next().unwrap()).unwrap();
-        let x1 = f64::from_str(split.next().unwrap()).unwrap();
-        let y1 = f64::from_str(split.next().unwrap()).unwrap();
+        let mut split = content.split_whitespace().peekable();
+        let x0 = parse_f64(&split);
+        let y0 = parse_f64(&split);
+        let x1 = parse_f64(&split);
+        let y1 = parse_f64(&split);
         let origin = last_pos;
         last_bezier = Bezier::new_l(origin, Point { x: x0, y: y0 }, Point { x: x1, y: y1 });
         beziers.push(last_bezier);
     };
+
+    fn parse_f64(mut split: &Peekable<SplitWhitespace>) -> f64 {
+        f64::from_str(split.next().unwrap().trim()).unwrap()
+    }
 
 
 
