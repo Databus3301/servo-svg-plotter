@@ -1,0 +1,23 @@
+10414  yay -Sy arduino
+10415  arduino-cli
+10416  arduino-ide
+10417  arduino-cli board list
+10418  ls
+10419  sudo arduino-cli board list
+10420  sudo arduino-ide
+10421  sudo arduino-ide  --no-sandbox
+10422  arduino-ide
+10423  arduino-cli board list
+10424  sudo arduino-cli board list
+10425  sudo arduino-ide
+10426  sudo arduino-ide --no-sandbox
+10427  arduino-cli core update-index
+10428  sudo arduino-cli core update-index
+10429  sudo arduino-cli core install esp8266:esp8266
+10430  sudo arduino-cli core install esp8266
+10431  arduino-cli config init
+10432  arduino-cli config add board_manager.additional_urls http://arduino.esp8266.com/stable/package_esp8266com_index.json
+10433  arduino-cli core update-index
+10434  arduino-cli core install esp8266:esp8266
+10435  arduino-cli board list
+10436  man history
