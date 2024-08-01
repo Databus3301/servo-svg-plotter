@@ -37,9 +37,9 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                     if i != 0 {
                         last_bezier = Bezier::new_l(last_pos, Point { x, y });
                         beziers.push(last_bezier.clone());
-                        println!("Line: {:?}", last_bezier);
+                        log("Line", last_bezier, start);
                     } else {
-                        println!("Move: {:?}", Point { x, y } );
+                        log("Move", last_bezier, start);
                     }
 
                     last_pos = Point { x, y };
@@ -58,7 +58,8 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 last_pos = last_bezier.point_at(1f64).unwrap();
                 beziers.push(last_bezier);
                 cur_content.clear();
-                println!("Cubic: {:?}", last_bezier);
+
+                log("Cubic", last_bezier, start);
             },
             ParseState::Quadratic => {
                 let nums = tokenize(&cur_content);
@@ -67,7 +68,8 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 last_pos = last_bezier.point_at(1f64).unwrap();
                 beziers.push(last_bezier);
                 cur_content.clear();
-                println!("Quadratic: {:?}", last_bezier);
+
+                log("Quadratic", last_bezier, start);
             },
             ParseState::Line => {
                 let nums = tokenize(&cur_content);
@@ -75,7 +77,8 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 last_pos = Point { x: nums[0], y: nums[1] };
                 beziers.push(last_bezier);
                 cur_content.clear();
-                println!("Line: {:?}", last_bezier);
+
+                log("Line", last_bezier, start);
             },
             ParseState::Horizontal => {
                 let nums = tokenize(&cur_content);
@@ -83,7 +86,8 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 last_pos = Point { x: nums[0], y: last_pos.y };
                 beziers.push(last_bezier);
                 cur_content.clear();
-                println!("Horizontal: {:?}", last_bezier);
+
+                log("Horizontal", last_bezier, start);
             },
             ParseState::Vertical => {
                 let nums = tokenize(&cur_content);
@@ -91,7 +95,8 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 last_pos = Point { x: last_pos.x, y: nums[0] };
                 beziers.push(last_bezier);
                 cur_content.clear();
-                println!("Vertical: {:?}", last_bezier);
+
+                log("Vertical", last_bezier, start);
             },
             ParseState::Arc => {
                 let nums = tokenize(&cur_content);
@@ -105,7 +110,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 let arcs = arc_to_beziers(origin, rx, ry, x_axis_rotation, large_arc_flag, sweep_flag, end);
                 for a in arcs {
                     beziers.push(a);
-                    println!("Arc: {:?}", a);
+                    log("Arc", a, start);
                 }
                 last_pos = end;
                 cur_content.clear();
@@ -119,14 +124,14 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                     start = None;
                 }
                 cur_content.clear();
-                println!("Close: {:?}", last_bezier);
+                log("Close", last_bezier, start);
             },
 
             _ => {
                 cur_content.push(*c);
                 if *c == '$' {
                     cur_content.clear();
-                }
+                    }
             }
         }
     };
@@ -140,6 +145,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
         nums
     }
+
 
     // replace all '-' with " -"
     for l in svg.iter_mut() {
@@ -213,6 +219,13 @@ enum ParseState {
     ARC,
     Close,
     CLOSE
+}
+
+fn log(titel: &str, content: Bezier, start: Option<Point>) {
+    if start.is_some() {
+        print!("    ");
+    }
+    println!("{}: {:?}", titel, content);
 }
 
 // THE FOLLOWING IS GENERATE BY AI (GPT4o)
