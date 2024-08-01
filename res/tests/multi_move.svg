@@ -1,5 +1,5 @@
 <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
     <path
-            d="M 10,10 L 50,10 M 100,10 L 150,10M 10,50 L 50,50 Z"
+            d="M 10,10 L 50,10 M100,10L150,10M 10,50 L 50,50 Z"
             fill="none" stroke="black" />
 </svg>

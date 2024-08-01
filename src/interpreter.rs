@@ -27,7 +27,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
     let mut resolve_path = |state: &ParseState, c: &char| {
         match state {
-            ParseState::Move => {
+            ParseState::MOVE => {
                 let nums = tokenize(&cur_content);
 
                 for i in (0..nums.len()).step_by(2) {
@@ -48,7 +48,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 }
                 cur_content.clear();
             },
-            ParseState::Cubic => {
+            ParseState::CUBIC => {
                 let nums = tokenize(&cur_content);
                 let origin = last_pos;
                 last_bezier = Bezier::new_c(origin, Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] }, Point { x: nums[4], y: nums[5] });
@@ -58,7 +58,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
                 log("Cubic", last_bezier, start);
             },
-            ParseState::Quadratic => {
+            ParseState::QUADRATIC => {
                 let nums = tokenize(&cur_content);
                 let origin = last_pos;
                 last_bezier = Bezier::new_q(origin, Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] });
@@ -68,7 +68,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
                 log("Quadratic", last_bezier, start);
             },
-            ParseState::Line => {
+            ParseState::LINE => {
                 let nums = tokenize(&cur_content);
                 last_bezier = Bezier::new_l(last_pos, Point { x: nums[0], y: nums[1] });
                 last_pos = Point { x: nums[0], y: nums[1] };
@@ -77,7 +77,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
                 log("Line", last_bezier, start);
             },
-            ParseState::Horizontal => {
+            ParseState::HORIZONTAL => {
                 let nums = tokenize(&cur_content);
                 last_bezier = Bezier::new_l(last_pos, Point { x: nums[0], y: last_pos.y });
                 last_pos = Point { x: nums[0], y: last_pos.y };
@@ -86,7 +86,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
                 log("Horizontal", last_bezier, start);
             },
-            ParseState::Vertical => {
+            ParseState::VERTICAL => {
                 let nums = tokenize(&cur_content);
                 last_bezier = Bezier::new_l(last_pos, Point { x: last_pos.x, y: nums[0] });
                 last_pos = Point { x: last_pos.x, y: nums[0] };
@@ -95,7 +95,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
                 log("Vertical", last_bezier, start);
             },
-            ParseState::Arc => {
+            ParseState::ARC => {
                 let nums = tokenize(&cur_content);
                 let origin = last_pos;
                 let rx = nums[0];
@@ -113,7 +113,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 cur_content.clear();
 
             },
-            ParseState::Close => {
+            ParseState::CLOSE => {
                 if let Some(s) = start {
                     last_bezier = Bezier::new_l(last_pos, s);
                     last_pos = s;
@@ -129,7 +129,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 cur_content.push(*c);
                 if *c == '$' {
                     cur_content.clear();
-                    }
+                }
             }
         }
     };
@@ -154,7 +154,41 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
     for l in svg {
         for c in l.chars() {
-            match c.to_ascii_lowercase() {
+            match c.to_ascii_uppercase() {
+                'M' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::MOVE;
+                },
+                'C' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::CUBIC;
+                },
+                'Q' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::QUADRATIC;
+                },
+                'L' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::LINE;
+                },
+                'H' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::HORIZONTAL;
+                },
+                'V' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::VERTICAL;
+                },
+                'A' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::ARC;
+                },
+                'Z' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::CLOSE;
+                },
+
+
                 'm' => {
                     resolve_path(&state, &c);
                     state = ParseState::Move;
