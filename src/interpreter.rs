@@ -80,9 +80,8 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
             ParseState::SMOOTH_CUBIC => {
                 let nums = tokenize(&cur_content);
                 let prev_points = last_bezier.get_points();
-                let p0 = Point { x: 2.0 * prev_points[2].x - prev_points[1].x, y: 2.0 * prev_points[2].y - prev_points[1].y };
-                let p1 = Point { x: nums[0], y: nums[1] };
-                last_bezier = Bezier::new_c(last_pos, p0, p1, Point { x: nums[2], y: nums[3] });
+                let p0 = Point { x: 2.0 * prev_points[3].x - prev_points[2].x, y: 2.0 * prev_points[3].y - prev_points[2].y };
+                last_bezier = Bezier::new_c(last_pos, p0, Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] });
                 last_pos = last_bezier.point_at(1f64).unwrap();
                 beziers.push(last_bezier);
                 cur_content.clear();
@@ -98,6 +97,17 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 cur_content.clear();
 
                 log("Cubic", last_bezier, start);
+            },
+            ParseState::SmoothCubic => {
+                let nums = tokenize(&cur_content);
+                let prev_points = last_bezier.get_points();
+                let p0 = Point { x: 2.0 * prev_points[3].x - prev_points[2].x, y: 2.0 * prev_points[3].y - prev_points[2].y };
+                last_bezier = Bezier::new_c(last_pos, p0, Point { x: last_pos.x + nums[0], y: last_pos.y + nums[1] }, Point { x: last_pos.x + nums[2], y: last_pos.y + nums[3] });
+                last_pos = last_bezier.point_at(1f64).unwrap();
+                beziers.push(last_bezier);
+                cur_content.clear();
+
+                log("SmoothCubic", last_bezier, start);
             },
             ParseState::QUADRATIC => {
                 let nums = tokenize(&cur_content);
