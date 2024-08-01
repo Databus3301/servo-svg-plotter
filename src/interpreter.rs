@@ -77,6 +77,18 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
                 log("Cubic", last_bezier, start);
             },
+            ParseState::SMOOTH_CUBIC => {
+                let nums = tokenize(&cur_content);
+                let prev_points = last_bezier.get_points();
+                let p0 = Point { x: 2.0 * prev_points[2].x - prev_points[1].x, y: 2.0 * prev_points[2].y - prev_points[1].y };
+                let p1 = Point { x: nums[0], y: nums[1] };
+                last_bezier = Bezier::new_c(last_pos, p0, p1, Point { x: nums[2], y: nums[3] });
+                last_pos = last_bezier.point_at(1f64).unwrap();
+                beziers.push(last_bezier);
+                cur_content.clear();
+
+                log("SmoothCubic", last_bezier, start);
+            },
             ParseState::Cubic => {
                 let nums = tokenize(&cur_content);
                 let origin = last_pos;
@@ -233,6 +245,10 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                     resolve_path(&state, &c);
                     state = ParseState::CUBIC;
                 },
+                'S' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::SMOOTH_CUBIC;
+                },
                 'Q' => {
                     resolve_path(&state, &c);
                     state = ParseState::QUADRATIC;
@@ -270,6 +286,10 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 'c' => {
                     resolve_path(&state, &c);
                     state = ParseState::Cubic;
+                },
+                's' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::SmoothCubic;
                 },
                 'q' => {
                     resolve_path(&state, &c);
