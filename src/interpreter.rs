@@ -116,12 +116,18 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                     last_bezier = Bezier::new_l(last_pos, s);
                     last_pos = s;
                     beziers.push(last_bezier);
+                    start = None;
                 }
                 cur_content.clear();
                 println!("Close: {:?}", last_bezier);
             },
 
-            _ => { cur_content.push(*c); }
+            _ => {
+                cur_content.push(*c);
+                if *c == '$' {
+                    cur_content.clear();
+                }
+            }
         }
     };
 
@@ -180,6 +186,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 _ => resolve_path(&ParseState::Read, &c),
             }
         }
+        resolve_path(&state, &'$');
     }
     beziers
 }
