@@ -37,17 +37,36 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                     if i != 0 {
                         last_bezier = Bezier::new_l(last_pos, Point { x, y });
                         beziers.push(last_bezier.clone());
+                        last_pos = Point { x, y };
+
                         log("Line", last_bezier, start);
                     } else {
                         last_pos = Point { x, y };
                         start = Some(last_pos);
                         println!("Start: {:?}", start);
                     }
-
-
                 }
                 cur_content.clear();
             },
+            ParseState::Move => {
+                let nums = tokenize(&cur_content);
+
+                for i in (0..nums.len()).step_by(2) {
+                    let x = nums[i];
+                    let y = nums[i+1];
+
+                    if i != 0 {
+                        last_bezier = Bezier::new_l(last_pos, Point { x, y });
+                        beziers.push(last_bezier.clone());
+                        log("Line", last_bezier, start);
+                    } else {
+                        last_pos = Point { x, y };
+                        start = Some(last_pos);
+                        println!("Start: {:?}", start);
+                    }
+                }
+                cur_content.clear();
+            }
             ParseState::CUBIC => {
                 let nums = tokenize(&cur_content);
                 let origin = last_pos;
@@ -151,7 +170,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
         *l = l.replace("h", " h");
     }
 
-
+    // for each d= attribute in the svg collect all the data for each path command then parse it
     for l in svg {
         for c in l.chars() {
             match c.to_ascii_uppercase() {
