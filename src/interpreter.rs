@@ -217,6 +217,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 println!();
             },
 
+
             _ => {
                 cur_content.push(*c);
                 if *c == '$' {
@@ -280,8 +281,9 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                     state = ParseState::VERTICAL;
                 },
                 'A' => {
-                    resolve_path(&state, &c);
-                    state = ParseState::ARC;
+                    panic!("received an arc 'A' this is not supported by the current implementation");
+                    //resolve_path(&state, &c);
+                    //state = ParseState::ARC;
                 },
                 'Z' => {
                     resolve_path(&state, &c);
@@ -322,12 +324,13 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                     state = ParseState::Vertical;
                 },
                 'a' => {
-                    resolve_path(&state, &c);
-                    state = ParseState::Arc;
+                    panic!("received an arc 'a' this is not supported by the current implementation");
+                    //resolve_path(&state, &c);
+                    //state = ParseState::Arc;
                 },
                 'z' => {
                     resolve_path(&state, &c);
-                    state = ParseState::Close;
+                    state = ParseState::CLOSE;
                 },
                 _ => resolve_path(&ParseState::Read, &c),
             }
@@ -361,7 +364,6 @@ enum ParseState {
     VERTICAL,
     Arc,
     ARC,
-    Close,
     CLOSE
 }
 
