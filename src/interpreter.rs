@@ -77,6 +77,16 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
                 log("Cubic", last_bezier, start);
             },
+            ParseState::Cubic => {
+                let nums = tokenize(&cur_content);
+                let origin = last_pos;
+                last_bezier = Bezier::new_c(origin, Point { x: last_pos.x + nums[0], y: last_pos.y + nums[1] }, Point { x: last_pos.x + nums[2], y: last_pos.y + nums[3] }, Point { x: last_pos.x + nums[4], y: last_pos.y + nums[5] });
+                last_pos = last_bezier.point_at(1f64).unwrap();
+                beziers.push(last_bezier);
+                cur_content.clear();
+
+                log("Cubic", last_bezier, start);
+            },
             ParseState::QUADRATIC => {
                 let nums = tokenize(&cur_content);
                 let origin = last_pos;
@@ -87,10 +97,51 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
                 log("Quadratic", last_bezier, start);
             },
+            ParseState::Quadratic => {
+                let nums = tokenize(&cur_content);
+                let origin = last_pos;
+                last_bezier = Bezier::new_q(origin, Point { x: last_pos.x + nums[0], y: last_pos.y + nums[1] }, Point { x: last_pos.x + nums[2], y: last_pos.y + nums[3] });
+                last_pos = last_bezier.point_at(1f64).unwrap();
+                beziers.push(last_bezier);
+                cur_content.clear();
+
+                log("Quadratic", last_bezier, start);
+            },
+            ParseState::SMOOTH_QUADRATIC => {
+                let nums = tokenize(&cur_content);
+                let p0 = Point { x: 2.0 * last_pos.x - last_bezier.get_origin().x, y: 2.0 * last_pos.y - last_bezier.get_origin().y };
+                let p1 = Point { x: nums[0], y: nums[1] };
+                last_bezier = Bezier::new_q(last_pos, p0, p1);
+                last_pos = last_bezier.point_at(1f64).unwrap();
+                beziers.push(last_bezier);
+                cur_content.clear();
+
+                log("SmoothQuadratic", last_bezier, start);
+            },
+            ParseState::SmoothQuadratic => {
+                let nums = tokenize(&cur_content);
+                let p0 = Point { x: 2.0 * last_pos.x - last_bezier.get_origin().x, y: 2.0 * last_pos.y - last_bezier.get_origin().y };
+                let p1 = Point { x: last_pos.x + nums[0], y: last_pos.y + nums[1] };
+                last_bezier = Bezier::new_q(last_pos, p0, p1);
+                last_pos = last_bezier.point_at(1f64).unwrap();
+                beziers.push(last_bezier);
+                cur_content.clear();
+
+                log("SmoothQuadratic", last_bezier, start);
+            },
             ParseState::LINE => {
                 let nums = tokenize(&cur_content);
                 last_bezier = Bezier::new_l(last_pos, Point { x: nums[0], y: nums[1] });
                 last_pos = Point { x: nums[0], y: nums[1] };
+                beziers.push(last_bezier);
+                cur_content.clear();
+
+                log("Line", last_bezier, start);
+            },
+            ParseState::Line => {
+                let nums = tokenize(&cur_content);
+                last_bezier = Bezier::new_l(last_pos, Point { x: last_pos.x + nums[0], y: last_pos.y + nums[1] });
+                last_pos = Point { x: last_pos.x + nums[0], y: last_pos.y + nums[1] };
                 beziers.push(last_bezier);
                 cur_content.clear();
 
@@ -186,6 +237,10 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                     resolve_path(&state, &c);
                     state = ParseState::QUADRATIC;
                 },
+                'T' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::SMOOTH_QUADRATIC;
+                },
                 'L' => {
                     resolve_path(&state, &c);
                     state = ParseState::LINE;
@@ -219,6 +274,10 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 'q' => {
                     resolve_path(&state, &c);
                     state = ParseState::Quadratic;
+                },
+                't' => {
+                    resolve_path(&state, &c);
+                    state = ParseState::SmoothQuadratic;
                 },
                 'l' => {
                     resolve_path(&state, &c);
@@ -258,8 +317,12 @@ enum ParseState {
     Move,
     Cubic,
     CUBIC,
+    SmoothCubic,
+    SMOOTH_CUBIC,
     Quadratic,
     QUADRATIC,
+    SmoothQuadratic,
+    SMOOTH_QUADRATIC,
     Line,
     LINE,
     Horizontal,
