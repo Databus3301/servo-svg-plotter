@@ -1,8 +1,6 @@
 mod bezier;
 mod interpreter;
 
-use bezier::Point;
-use bezier::Bezier;
 
 fn main() {
 

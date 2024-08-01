@@ -1,7 +1,6 @@
 use std::f64::consts::PI;
 use std::io::{BufRead, BufReader};
-use std::iter::Peekable;
-use std::str::{FromStr, SplitWhitespace};
+use std::str::FromStr;
 use crate::bezier::Point;
 use crate::bezier::Bezier;
 
@@ -52,11 +51,12 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 let nums = tokenize(&cur_content);
 
                 for i in (0..nums.len()).step_by(2) {
-                    let x = nums[i];
-                    let y = nums[i+1];
+                    let x = last_pos.x + nums[i];
+                    let y = last_pos.y + nums[i+1];
 
                     if i != 0 {
-                        last_bezier = Bezier::new_l(last_pos, Point { x, y });
+                        last_bezier = Bezier::new_l(last_pos, Point {  x, y });
+                        last_pos = Point { x, y };
                         beziers.push(last_bezier.clone());
                         log("Line", last_bezier, start);
                     } else {
@@ -173,7 +173,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
     // for each d= attribute in the svg collect all the data for each path command then parse it
     for l in svg {
         for c in l.chars() {
-            match c.to_ascii_uppercase() {
+            match c {
                 'M' => {
                     resolve_path(&state, &c);
                     state = ParseState::MOVE;
