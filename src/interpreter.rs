@@ -39,15 +39,12 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                         beziers.push(last_bezier.clone());
                         log("Line", last_bezier, start);
                     } else {
-                        log("Move", last_bezier, start);
-                    }
-
-                    last_pos = Point { x, y };
-
-                    if start.is_none() {
+                        last_pos = Point { x, y };
                         start = Some(last_pos);
                         println!("Start: {:?}", start);
                     }
+
+
                 }
                 cur_content.clear();
             },
@@ -125,6 +122,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
                 }
                 cur_content.clear();
                 log("Close", last_bezier, start);
+                println!();
             },
 
             _ => {

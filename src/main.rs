@@ -6,8 +6,8 @@ use bezier::Bezier;
 
 fn main() {
 
-    interpreter::parse_svg(interpreter::read_in("./res/tests/relative_absolute.svg"));
-    println!();
+    //interpreter::parse_svg(interpreter::read_in("./res/tests/relative_absolute.svg"));
     interpreter::parse_svg(interpreter::read_in("./res/tests/relative_decimals.svg"));
+    //interpreter::parse_svg(interpreter::read_in("./res/tests/multi_move.svg"));
 
 }
