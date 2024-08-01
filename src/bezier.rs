@@ -55,6 +55,14 @@ impl Bezier {
         }
     }
 
+    pub fn get_points(&self) -> Vec<Point> {
+        match self {
+            Bezier::Cubic(points) => points.to_vec(),
+            Bezier::Quadratic(points) => points.to_vec(),
+            Bezier::Line(points) => points.to_vec(),
+        }
+    }
+
     pub fn curvature_at_point(&self, t: f64) -> Result<Point, &'static str> {
         if t > 1.0 || t < 0.0 {
             return Err("t must be between 0 and 1");

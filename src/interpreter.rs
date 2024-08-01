@@ -109,7 +109,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
             },
             ParseState::SMOOTH_QUADRATIC => {
                 let nums = tokenize(&cur_content);
-                let p0 = Point { x: 2.0 * last_pos.x - last_bezier.get_origin().x, y: 2.0 * last_pos.y - last_bezier.get_origin().y };
+                let p0 = Point { x: 2.0 * last_pos.x - last_bezier.get_points()[1].x, y: 2.0 * last_pos.y - last_bezier.get_points()[1].y };
                 let p1 = Point { x: nums[0], y: nums[1] };
                 last_bezier = Bezier::new_q(last_pos, p0, p1);
                 last_pos = last_bezier.point_at(1f64).unwrap();
@@ -120,7 +120,7 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
             },
             ParseState::SmoothQuadratic => {
                 let nums = tokenize(&cur_content);
-                let p0 = Point { x: 2.0 * last_pos.x - last_bezier.get_origin().x, y: 2.0 * last_pos.y - last_bezier.get_origin().y };
+                let p0 = Point { x: 2.0 * last_pos.x - last_bezier.get_points()[1].x, y: 2.0 * last_pos.y - last_bezier.get_points()[1].y };
                 let p1 = Point { x: last_pos.x + nums[0], y: last_pos.y + nums[1] };
                 last_bezier = Bezier::new_q(last_pos, p0, p1);
                 last_pos = last_bezier.point_at(1f64).unwrap();
