@@ -69,13 +69,18 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
             }
             ParseState::CUBIC => {
                 let nums = tokenize(&cur_content);
-                let origin = last_pos;
-                last_bezier = Bezier::new_c(origin, Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] }, Point { x: nums[4], y: nums[5] });
-                last_pos = last_bezier.point_at(1f64).unwrap();
-                beziers.push(last_bezier);
-                cur_content.clear();
 
-                log("Cubic", last_bezier, start);
+                for i in (0..nums.len()).step_by(6) {
+                    if nums.len() <= i+5 { break; }
+
+                    last_bezier = Bezier::new_c(last_pos, Point { x: nums[i], y: nums[i+1] }, Point { x: nums[i+2], y: nums[i+3] }, Point { x: nums[i+4], y: nums[i+5] });
+                    last_pos = last_bezier.point_at(1f64).unwrap();
+                    beziers.push(last_bezier);
+
+                    log("Cubic", last_bezier, start);
+                }
+
+                cur_content.clear();
             },
             ParseState::SMOOTH_CUBIC => {
                 let nums = tokenize(&cur_content);
@@ -116,23 +121,35 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
             },
             ParseState::QUADRATIC => {
                 let nums = tokenize(&cur_content);
-                let origin = last_pos;
-                last_bezier = Bezier::new_q(origin, Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] });
-                last_pos = last_bezier.point_at(1f64).unwrap();
-                beziers.push(last_bezier);
+
+                for i in (0..nums.len()).step_by(4) {
+                    if nums.len() <= i + 3 { break; }
+
+                    last_bezier = Bezier::new_q(last_pos, Point { x: nums[0], y: nums[1] }, Point { x: nums[2], y: nums[3] });
+                    last_pos = last_bezier.point_at(1f64).unwrap();
+                    beziers.push(last_bezier);
+
+                    log("Quadratic", last_bezier, start);
+                }
+
                 cur_content.clear();
 
-                log("Quadratic", last_bezier, start);
             },
             ParseState::Quadratic => {
                 let nums = tokenize(&cur_content);
-                let origin = last_pos;
-                last_bezier = Bezier::new_q(origin, Point { x: last_pos.x + nums[0], y: last_pos.y + nums[1] }, Point { x: last_pos.x + nums[2], y: last_pos.y + nums[3] });
-                last_pos = last_bezier.point_at(1f64).unwrap();
-                beziers.push(last_bezier);
+
+                for i in (0..nums.len()).step_by(4) {
+                    if nums.len() <= i + 3 { break; }
+
+                    last_bezier = Bezier::new_q(last_pos, Point { x: last_pos.x + nums[0], y: last_pos.y + nums[1] }, Point { x: last_pos.x + nums[2], y: last_pos.y + nums[3] });
+                    last_pos = last_bezier.point_at(1f64).unwrap();
+                    beziers.push(last_bezier);
+
+                    log("Quadratic", last_bezier, start);
+                }
+
                 cur_content.clear();
 
-                log("Quadratic", last_bezier, start);
             },
             ParseState::SMOOTH_QUADRATIC => {
                 let nums = tokenize(&cur_content);
