@@ -91,14 +91,16 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
             ParseState::Cubic => {
                 let nums = tokenize(&cur_content);
                 for i in (0..nums.len()).step_by(6) {
+                    if nums.len() <= i+5 { break; }
+
                     let origin = last_pos;
                     last_bezier = Bezier::new_c(origin, Point { x: last_pos.x + nums[i], y: last_pos.y + nums[i+1] }, Point { x: last_pos.x + nums[i+2], y: last_pos.y + nums[i+3] }, Point { x: last_pos.x + nums[i+4], y: last_pos.y + nums[i+5] });
                     last_pos = last_bezier.point_at(1f64).unwrap();
                     beziers.push(last_bezier);
-                    cur_content.clear();
 
                     log("Cubic", last_bezier, start);
                 }
+                cur_content.clear();
 
             },
             ParseState::SmoothCubic => {
