@@ -86,3 +86,9 @@ impl Bezier {
         }
     }
 }
+
+pub struct SVG {
+    pub(crate) width: f64,
+    pub(crate) height: f64,
+    pub(crate) paths: Vec<Bezier>,
+}
