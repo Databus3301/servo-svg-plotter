@@ -4,6 +4,8 @@ mod interpreter;
 
 fn main() {
 
-    interpreter::parse_svg(interpreter::read_in("./res/out.svg"));
+    let bs = interpreter::parse_svg(interpreter::read_in("./res/out.svg"));
+    println!("bezier count: {}", bs.len());
+
 
 }
