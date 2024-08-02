@@ -90,13 +90,16 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
             },
             ParseState::Cubic => {
                 let nums = tokenize(&cur_content);
-                let origin = last_pos;
-                last_bezier = Bezier::new_c(origin, Point { x: last_pos.x + nums[0], y: last_pos.y + nums[1] }, Point { x: last_pos.x + nums[2], y: last_pos.y + nums[3] }, Point { x: last_pos.x + nums[4], y: last_pos.y + nums[5] });
-                last_pos = last_bezier.point_at(1f64).unwrap();
-                beziers.push(last_bezier);
-                cur_content.clear();
+                for i in (0..nums.len()).step_by(6) {
+                    let origin = last_pos;
+                    last_bezier = Bezier::new_c(origin, Point { x: last_pos.x + nums[i], y: last_pos.y + nums[i+1] }, Point { x: last_pos.x + nums[i+2], y: last_pos.y + nums[i+3] }, Point { x: last_pos.x + nums[i+4], y: last_pos.y + nums[i+5] });
+                    last_pos = last_bezier.point_at(1f64).unwrap();
+                    beziers.push(last_bezier);
+                    cur_content.clear();
 
-                log("Cubic", last_bezier, start);
+                    log("Cubic", last_bezier, start);
+                }
+
             },
             ParseState::SmoothCubic => {
                 let nums = tokenize(&cur_content);
@@ -236,7 +239,6 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
         nums
     }
-
 
     // replace all '-' with " -"
     for l in svg.iter_mut() {
