@@ -183,10 +183,28 @@ pub fn parse_svg(mut svg: Vec<String>) -> Vec<Bezier> {
 
                 log("Horizontal", last_bezier, start);
             },
+            ParseState::Horizontal => {
+                let nums = tokenize(&cur_content);
+                last_bezier = Bezier::new_l(last_pos, Point { x: last_pos.x + nums[0], y: last_pos.y });
+                last_pos = Point { x: last_pos.x + nums[0], y: last_pos.y };
+                beziers.push(last_bezier);
+                cur_content.clear();
+
+                log("Horizontal", last_bezier, start);
+            },
             ParseState::VERTICAL => {
                 let nums = tokenize(&cur_content);
                 last_bezier = Bezier::new_l(last_pos, Point { x: last_pos.x, y: nums[0] });
                 last_pos = Point { x: last_pos.x, y: nums[0] };
+                beziers.push(last_bezier);
+                cur_content.clear();
+
+                log("Vertical", last_bezier, start);
+            },
+            ParseState::Vertical => {
+                let nums = tokenize(&cur_content);
+                last_bezier = Bezier::new_l(last_pos, Point { x: last_pos.x, y: last_pos.y + nums[0] });
+                last_pos = Point { x: last_pos.x, y: last_pos.y + nums[0] };
                 beziers.push(last_bezier);
                 cur_content.clear();
 
